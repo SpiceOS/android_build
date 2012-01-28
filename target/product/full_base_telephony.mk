@@ -21,7 +21,11 @@
 
 PRODUCT_VENDOR_PROPERTIES := \
     keyguard.no_require_sim?=true \
+
+ifeq ($(SPICEOS_BUILD),)
+PRODUCT_VENDOR_PROPERTIES += \
     ro.com.android.dataroaming?=true
+endif
 
 PRODUCT_COPY_FILES := \
     device/sample/etc/apns-full-conf.xml:system/etc/apns-conf.xml \
