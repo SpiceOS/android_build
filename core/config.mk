@@ -316,6 +316,10 @@ include $(BUILD_SYSTEM)/envsetup.mk
 # See envsetup.mk for a description of SCAN_EXCLUDE_DIRS
 FIND_LEAVES_EXCLUDES := $(addprefix --prune=, $(SCAN_EXCLUDE_DIRS) .repo .git)
 
+ifneq ($(SPICEOS_BUILD),)
+include vendor/spiceos/config/BoardConfigSpiceos.mk
+endif
+
 # The build system exposes several variables for where to find the kernel
 # headers:
 #   TARGET_DEVICE_KERNEL_HEADERS is automatically created for the current
@@ -941,7 +945,7 @@ INTERNAL_KERNEL_CMDLINE += androidboot.super_partition=$(BOARD_SUPER_PARTITION_M
 BOARD_BUILD_RETROFIT_DYNAMIC_PARTITIONS_OTA_PACKAGE := true
 
 # If "vendor" is listed as one of the dynamic partitions but without its image available (e.g. an
-# AOSP target built without vendor image), don't build the retrofit full OTA package. Because we
+# spiceos target built without vendor image), don't build the retrofit full OTA package. Because we
 # won't be able to build meaningful super_* images for retrofitting purpose.
 ifneq (,$(filter vendor,$(BOARD_SUPER_PARTITION_PARTITION_LIST)))
 ifndef BUILDING_VENDOR_IMAGE
@@ -1154,6 +1158,12 @@ endif
 dont_bother_goals := out \
     product-graph dump-products
 
+ifneq ($(SPICEOS_BUILD),)
+## We need to be sure the global selinux policies are included
+## last, to avoid accidental resetting by device configs
+$(eval include device/spiceos/sepolicy/common/sepolicy.mk)
+endif
+
 # Make ANDROID Soong config variables visible to Android.mk files, for
 # consistency with those defined in BoardConfig.mk files.
 include $(BUILD_SYSTEM)/android_soong_config_vars.mk
@@ -1170,5 +1180,8 @@ DEFAULT_DATA_OUT_MODULES := ltp $(ltp_packages) $(kselftest_modules)
 
 # Make RECORD_ALL_DEPS readonly.
 RECORD_ALL_DEPS :=$= $(filter true,$(RECORD_ALL_DEPS))
+
+# Include any vendor specific config.mk file
+-include vendor/*/build/core/config.mk
 
 include $(BUILD_SYSTEM)/dumpvar.mk
