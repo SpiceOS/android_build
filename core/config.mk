@@ -1159,9 +1159,11 @@ dont_bother_goals := out \
     product-graph dump-products
 
 ifneq ($(SPICEOS_BUILD),)
+ifneq ($(wildcard device/spiceos/sepolicy/common/sepolicy.mk),)
 ## We need to be sure the global selinux policies are included
 ## last, to avoid accidental resetting by device configs
 $(eval include device/spiceos/sepolicy/common/sepolicy.mk)
+endif
 endif
 
 # Make ANDROID Soong config variables visible to Android.mk files, for
